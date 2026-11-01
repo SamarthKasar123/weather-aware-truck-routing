@@ -1,5 +1,9 @@
 # Weather-Aware Truck Routing
 
+**Live demo:** https://weather-aware-truck-routing-omega.vercel.app · API: https://truck-routing-api-d071.onrender.com/api/health
+
+> Hosted on free tiers. The API sleeps after 15 minutes idle, so the first search can take up to a minute while it wakes. After that it's fast.
+
 A React + Django app that helps a truck driver pick the safest route. It weighs forecast weather at the truck's estimated arrival time at each point on the route, the load weight, and the travel time.
 
 **Inputs:** origin, destination, departure date and time, load weight, and a sample interval of 10, 25 or 50 miles.
@@ -16,7 +20,7 @@ No API keys are needed. All providers are free:
 | Concern | Provider |
 |---|---|
 | Routing (with alternatives) | [OSRM](https://project-osrm.org/) public server |
-| Geocoding / autocomplete | [Photon](https://photon.komoot.io/) (OpenStreetMap data) |
+| Geocoding / autocomplete | [Photon](https://photon.komoot.io/) (OpenStreetMap data), falling back to [Open-Meteo geocoding](https://open-meteo.com/en/docs/geocoding-api) when Photon is unreachable (e.g. from Render) |
 | Hourly forecasts | [Open-Meteo](https://open-meteo.com/) |
 | Map tiles | CARTO Light (OpenStreetMap data) |
 
