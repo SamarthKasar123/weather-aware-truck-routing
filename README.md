@@ -67,6 +67,23 @@ cd frontend && npm run build
 
 ---
 
+## Deployment (free: Render + Vercel)
+
+| Part | Host | Config |
+|---|---|---|
+| Django API | Render free web service | [`render.yaml`](render.yaml) (Blueprint) |
+| React app | Vercel Hobby | [`frontend/vercel.json`](frontend/vercel.json), root directory `frontend` |
+
+1. **Render:** New → Blueprint → select this repo → Apply. Wait for the deploy, then check that `https://<service>.onrender.com/api/health` returns `{"status":"ok"}`.
+2. **Vercel:** Add New → Project → import this repo.
+   - Set the project name to `weather-aware-truck-routing` and the root directory to `frontend`.
+   - Add the environment variable `VITE_API_BASE` = `https://<service>.onrender.com/api`, then deploy.
+3. **Allowed sites:** `render.yaml` already allows `https://weather-aware-truck-routing*.vercel.app`. If your Vercel URL is different, edit `CORS_ALLOWED_ORIGIN_REGEXES` or `CORS_ALLOWED_ORIGINS` on Render.
+
+Render's free services sleep after 15 minutes idle, and the first request afterwards takes about 50 s. The frontend pings `/api/health` on page load to start waking the server, and tells the user if a request is slow because of this.
+
+---
+
 ## How it works
 
 ```

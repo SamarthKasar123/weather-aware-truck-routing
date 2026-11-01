@@ -34,6 +34,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
+/** Fire-and-forget ping so a sleeping free-tier backend starts waking up on page load. */
+export function wakeServer(): void {
+  fetch(`${BASE}/health`).catch(() => undefined);
+}
+
 export function geocode(q: string, signal?: AbortSignal): Promise<Place[]> {
   return request<{ results: Place[] }>(`/geocode?q=${encodeURIComponent(q)}`, { signal }).then(
     (r) => r.results,

@@ -48,6 +48,11 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
 ).split(",")
+# Optional regex list, e.g. to allow a Vercel project's production and preview URLs.
+CORS_ALLOWED_ORIGIN_REGEXES = [r for r in os.environ.get("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",") if r]
+
+# Behind Render's HTTPS proxy.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 STATIC_URL = "static/"
 USE_TZ = True

@@ -1,14 +1,15 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CheckpointTable from "./components/CheckpointTable";
 import HeatmapControls from "./components/HeatmapControls";
 import MapView from "./components/MapView";
 import RouteCards from "./components/RouteCards";
 import TripForm from "./components/TripForm";
-import { fetchHeatmap, planTrip } from "./lib/api";
+import { fetchHeatmap, planTrip, wakeServer } from "./lib/api";
 import { formatTimeFull } from "./lib/format";
 import type { Checkpoint, Heatmap, HeatmapMetric, Plan, PlanRequest } from "./types";
 
 const MAX_HOUR = 48;
+const SLOW_NOTICE_MS = 8000; // free hosting sleeps when idle; explain long first requests
 
 export default function App() {
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -25,7 +26,16 @@ export default function App() {
   const [hour, setHour] = useState(0);
   const [hoverValue, setHoverValue] = useState<number | null>(null);
 
+  const [slow, setSlow] = useState(false);
   const inflight = useRef<AbortController | null>(null);
+
+  useEffect(wakeServer, []);
+
+  useEffect(() => {
+    if (!loading) return setSlow(false);
+    const timer = window.setTimeout(() => setSlow(true), SLOW_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   const submit = useCallback(async (req: PlanRequest) => {
     inflight.current?.abort();
@@ -167,7 +177,14 @@ export default function App() {
         {loading && (
           <div className="map-loading">
             <span className="spinner" />
-            Finding routes and forecasts…
+            <span>
+              Finding routes and forecasts…
+              {slow && (
+                <small className="slow-note">
+                  The server may be waking up from sleep (free hosting). This can take up to a minute.
+                </small>
+              )}
+            </span>
           </div>
         )}
       </main>
