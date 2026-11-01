@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.test import SimpleTestCase
 
 from trips.services import geocoding
+from trips.services.http import ProviderError
 
 
 def _feature(name, lat, lon, osm_key, state="", country="", countrycode=""):
@@ -43,3 +44,34 @@ class SearchTests(SimpleTestCase):
     def test_resolve_accepts_lat_lon_text(self):
         p = geocoding.resolve("19.9975, 73.7898", "origin")
         self.assertEqual((p.lat, p.lon), (19.9975, 73.7898))
+
+
+def _om_result(name, admin1, country, cc, lat, lon):
+    return {"name": name, "admin1": admin1, "country": country, "country_code": cc,
+            "latitude": lat, "longitude": lon}
+
+
+class OpenMeteoFallbackTests(SimpleTestCase):
+    def setUp(self):
+        cache.clear()
+
+    def _fake(self, url, params, provider):
+        if "photon" in url:
+            raise ProviderError("Geocoder is unreachable: ConnectionError")
+        self.assertEqual(params["name"], "Salina")  # only the part before the comma
+        return 200, {"results": [
+            _om_result("Salinas", "California", "United States", "US", 36.68, -121.66),
+            _om_result("Salina", "Kansas", "United States", "US", 38.84, -97.61),
+        ]}
+
+    def test_falls_back_and_matches_us_state_code(self):
+        with mock.patch.object(geocoding, "get_json", side_effect=self._fake):
+            places = geocoding.search("Salina, KS")
+        self.assertEqual(places[0].label, "Salina, Kansas, USA")
+        self.assertTrue(cache.get(geocoding.PHOTON_DOWN_KEY))
+
+    def test_skips_photon_while_marked_down(self):
+        cache.set(geocoding.PHOTON_DOWN_KEY, True)
+        with mock.patch.object(geocoding, "get_json", side_effect=self._fake) as m:
+            geocoding.search("Salina")
+        self.assertEqual(m.call_count, 1)  # straight to Open-Meteo

@@ -61,6 +61,9 @@ TIME_ZONE = "UTC"
 # --- Third-party providers (all free, no API key required) ---
 OSRM_BASE_URL = os.environ.get("OSRM_BASE_URL", "https://router.project-osrm.org")
 PHOTON_BASE_URL = os.environ.get("PHOTON_BASE_URL", "https://photon.komoot.io")
+OPEN_METEO_GEOCODING_URL = os.environ.get(
+    "OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com/v1/search"
+)
 OPEN_METEO_BASE_URL = os.environ.get("OPEN_METEO_BASE_URL", "https://api.open-meteo.com")
 # Optional commercial key (use with OPEN_METEO_BASE_URL=https://customer-api.open-meteo.com).
 OPEN_METEO_API_KEY = os.environ.get("OPEN_METEO_API_KEY", "")
